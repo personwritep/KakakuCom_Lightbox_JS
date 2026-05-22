@@ -2,8 +2,8 @@
 // @name        KakakuCom Lightbox JS
 // @namespace        http://tampermonkey.net/
 // @version        0.1
-// @description        価格.COMのユーザー投稿画像を高精細拡大表示
-// @author        価格.COMユーザー
+// @description        価格.comのユーザー投稿画像を高精細拡大表示
+// @author        価格.comユーザー
 // @match        https://bbs.kakaku.com/bbs/*
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=kakaku.com
 // @noframes
