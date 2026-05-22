@@ -5,6 +5,7 @@
 // @description        価格.COMのユーザー投稿画像を高精細拡大表示
 // @author        価格.COMユーザー
 // @match        https://bbs.kakaku.com/bbs/*
+// @icon        https://www.google.com/s2/favicons?sz=64&domain=kakaku.com
 // @noframes
 // @grant        none
 // @updateURL        https://github.com/personwritep/KakakuCom_Lightbox_JS/raw/main/KakakuCom_Lightbox_JS.user.js
