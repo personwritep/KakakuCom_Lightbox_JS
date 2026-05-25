@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name        KakakuCom Lightbox JS
 // @namespace        http://tampermonkey.net/
-// @version        0.1
-// @description        価格.comのユーザー投稿画像を高精細拡大表示
-// @author        価格.comユーザー
-// @match        https://bbs.kakaku.com/bbs/*
+// @version        0.2
+// @description        価格.COMのユーザー投稿画像を高精細拡大表示
+// @author        価格.COMユーザー
+// @match        https://*.kakaku.com/*
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=kakaku.com
 // @noframes
 // @grant        none
@@ -42,7 +42,8 @@ function lightbox(event){
         if(event.ctrlKey){
             event.preventDefault();
             set_img(elem);
-            ex_mag(); }}}
+            ex_mag();
+        }}}
 
 
 
@@ -75,7 +76,7 @@ function box_env(){
 
 
     let lightbox=
-        '<div id="lightbox">'+
+        '<dialog id="lightbox">'+
         '<div id="photo_sw">'+
         '<div id="mag_sw">'+
         '<p id="ws" class="bc" title="拡大率：マウスホイールで調節">Gz '+
@@ -88,12 +89,13 @@ function box_env(){
         '.fin { animation: fadeIn .5s ease 0s 1 normal; animation-fill-mode: both; } '+
         '@keyframes fadeOut { 0% {opacity: 1} 100% {opacity: 0}} '+
         '.fout { animation: fadeOut .2s ease 0s 1 normal; animation-fill-mode: both; } '+
-        '#lightbox { position: fixed; top: 0; left: 0; visibility: hidden; z-index: calc(infinity); '+
+        '#lightbox { position: fixed; top: 0; left: 0; box-sizing: border-box; visibility: hidden; '+
+        'width: 100vw; height: 100vh; max-width: unset; max-height: unset; '+
         'display: grid; place-items: center; overflow: auto; user-select: none; '+
-        'background: black; width: 100vw; height: 100vh; text-align: center; } '+
+        'scrollbar-color: #bbb #000; background: black; } '+
         '#photo_sw { position: fixed; top: 0; width: 100%; height: 15%; } '+
         '#mag_sw { position: fixed; top: 0; right: 20px; display: flex; padding: 20px; '+
-        'width: auto; justify-content: flex-end; box-sizing: content-box; opacity: 0; } '+
+        'width: auto; justify-content: flex-end; opacity: 0; } '+
         '#photo_sw:hover #mag_sw { opacity: 1; } '+
         '#help_svg { margin-left: 20px; cursor: pointer; } '+
         '.bc { height: 24px; padding: 0 5px; margin: 0 4px; font: bold 22px/28px Meiryo; '+
@@ -101,10 +103,9 @@ function box_env(){
         'cursor: pointer; box-sizing: content-box !important; overflow: hidden; } '+
         '#wsv { font: inherit; } '+
         '#ws svg { margin-right: -4px; vertical-align: -4px; } '+
-        '#box_img { width: 98vw; height: 98vh; padding: 1vh 1vw; object-fit: contain; '+
-        'box-sizing: content-box; max-width: unset; max-height: unset; } '+
+        '#box_img { width: calc(100vw - 6px); height: calc(100vh - 6px); object-fit: contain; } '+
         'img { pointer-events: auto !important; } '+
-        '</style></div>';
+        '</style></dialog>';
 
     if(!document.querySelector('#lightbox')){
         document.body.insertAdjacentHTML('beforeend', lightbox); }
@@ -184,20 +185,29 @@ function set_img(target){
     let box_img=lightbox.querySelector('#box_img');
 
     if(lightbox && box_img && target){
-        let origin_src;
+        let large_src;
+        let medium_src;
+        let image_src='';
         let img_src=target.getAttribute('src');
-        if(img_src && img_src.includes('k-img.com/images/bbs/')){
-            origin_src=img_src.replace('/bbs/', '/original/bbs/');
-            origin_src=origin_src.replace(/(_m|_s)/g, ''); }
+        if(img_src && img_src.includes('k-img.com/images/')){
+            if(!img_src.includes('/itemview/')){
+                large_src=img_src.replace('/images/', '/images/original/').replace(/(_m|_s)/g, '');
+                medium_src=img_src.replace(/_s/g, '_m');
 
-        if(origin_src){
-            disp_mode=1; // Lightbox表示 通常拡大
-            disp_ws(disp_mode);
-            box_img.src=origin_src;
-            html_.style.overflow='hidden';
-            lightbox.style.visibility='visible';
-            lightbox.classList.remove('fout');
-            lightbox.classList.add('fin'); }}
+                disp_mode=1; // Lightbox表示 通常拡大
+                lightbox.showModal(); // モーダル表示🔴
+                disp_ws(disp_mode);
+                box_img.src=large_src; //「等倍表示」の元画像がある場合
+                html_.style.overflow='hidden';
+                lightbox.style.visibility='visible';
+                lightbox.classList.remove('fout');
+                lightbox.classList.add('fin');
+
+                setTimeout(()=>{ //「mサイズ」の画像しかない場合
+                    if(!box_img.naturalWidth){
+                        box_img.src=medium_src;
+                    }}, 1000);
+            }}}
 
 } // set_img()
 
@@ -207,7 +217,7 @@ function ex_mag(){
     let lightbox=document.querySelector('#lightbox');
     let box_img=lightbox.querySelector('#box_img');
 
-    if(lightbox){
+    if(lightbox && box_img){
         lightbox.onclick=function(event){ // 拡張ディスプレイモード
             event.preventDefault();
 
@@ -218,17 +228,19 @@ function ex_mag(){
                     disp_mode=2; // 拡張拡大
                     disp_ws(disp_mode);
                     lightbox.style.overflow='auto';
+                    lightbox.style.height='calc(100vh + 3px)';
+                    lightbox.style.width='calc(100vw + 3px)';
                     box_img.style.height='auto';
-                    box_img.style.padding='0';
                     box_img.style.width=view_w +'vw';
                     mag_point(event); }
                 else{
                     disp_mode=1; // 通常拡大
                     disp_ws(disp_mode);
                     lightbox.style.overflow='hidden';
-                    box_img.style.height='98vh';
-                    box_img.style.width='98vw';
-                    box_img.style.padding='1vh 1vw'; }}
+                    lightbox.style.height='100vh';
+                    lightbox.style.width='100vw';
+                    box_img.style.height='calc(100vh - 6px)';
+                    box_img.style.width='calc(100vw - 6px)'; }}
 
 
             function mag_point(event){
@@ -268,12 +280,14 @@ function close_box(){
         lightbox.classList.remove('fin');
         lightbox.classList.add('fout');
         lightbox.style.overflow='hidden'; // overflowのリセット
-        box_img.style.height='98vh';
-        box_img.style.width='98vw';
-        box_img.style.padding='1vh 1vw';
+        lightbox.style.height='100vh';
+        lightbox.style.width='100vw';
+        box_img.style.height='calc(100vh - 6px)';
+        box_img.style.width='calc(100vw - 6px)';
         setTimeout(()=>{
             lightbox.style.visibility='hidden';
             box_img.src='';
+            lightbox.close(); // モーダル表示を閉じる 🔴
         }, 200); }}
 
 
