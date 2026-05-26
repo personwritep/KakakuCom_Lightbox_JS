@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        KakakuCom Lightbox JS
 // @namespace        http://tampermonkey.net/
-// @version        0.2
+// @version        0.3
 // @description        価格.COMのユーザー投稿画像を高精細拡大表示
 // @author        価格.COMユーザー
 // @match        https://*.kakaku.com/*
@@ -15,6 +15,7 @@
 
 let disp_mode=0; // 拡張ディスプレイモードの判別
 let c_press=false; // Ctrlキー押下フラグ
+let position_y=0; // ページのスクロール位置
 
 let view_w=get_cookie('KCL_w')*1; // 拡大率
 if(!view_w){
@@ -214,6 +215,7 @@ function set_img(target){
 
 
 function ex_mag(){
+    position_y=window.scrollY;
     let lightbox=document.querySelector('#lightbox');
     let box_img=lightbox.querySelector('#box_img');
 
@@ -262,7 +264,8 @@ function ex_mag(){
                     actal_x=(zk*view_w -50)*ww/100;
                     actal_y=(top*ww*view_w)/(wh*ratio*100) - wh/2; }
 
-                lightbox.scrollTo(actal_x, actal_y); }
+                lightbox.scrollLeft=actal_x;
+                lightbox.scrollTop=actal_y; }
 
         } // onclick()
     }
@@ -271,6 +274,8 @@ function ex_mag(){
 
 
 function close_box(){
+    window.scrollTo(0, position_y);
+
     let lightbox=document.querySelector('#lightbox');
     let box_img=lightbox.querySelector('#box_img');
     if(lightbox && box_img){
