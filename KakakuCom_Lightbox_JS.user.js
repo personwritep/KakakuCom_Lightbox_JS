@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        KakakuCom Lightbox JS
 // @namespace        http://tampermonkey.net/
-// @version        0.3
+// @version        0.4
 // @description        価格.COMのユーザー投稿画像を高精細拡大表示
 // @author        価格.COMユーザー
 // @match        https://*.kakaku.com/*
@@ -82,6 +82,7 @@ function box_env(){
         '<div id="mag_sw">'+
         '<p id="ws" class="bc" title="拡大率：マウスホイールで調節">Gz '+
         '<span id="wsv"></span>'+ ud_SVG +'</p>'+
+        '<p id="original" class="bc" title="元画像">Original</p>'+
         '<a id="help_svg">'+ help_SVG +'</a>'+
         '</div></div>'+
         '<img id="box_img">'+
@@ -98,7 +99,8 @@ function box_env(){
         '#mag_sw { position: fixed; top: 0; right: 20px; display: flex; padding: 20px; '+
         'width: auto; justify-content: flex-end; opacity: 0; } '+
         '#photo_sw:hover #mag_sw { opacity: 1; } '+
-        '#help_svg { margin-left: 20px; cursor: pointer; } '+
+        '#m_svg { margin-left: 10px; cursor: pointer; } '+
+        '#help_svg { margin-left: 15px; cursor: pointer; } '+
         '.bc { height: 24px; padding: 0 5px; margin: 0 4px; font: bold 22px/28px Meiryo; '+
         'border: 2px solid #000; border-radius: 4px; color: #000; background: #fff; '+
         'cursor: pointer; box-sizing: content-box !important; overflow: hidden; } '+
@@ -199,6 +201,7 @@ function set_img(target){
                 lightbox.showModal(); // モーダル表示🔴
                 disp_ws(disp_mode);
                 box_img.src=large_src; //「等倍表示」の元画像がある場合
+                size_disp(1);
                 html_.style.overflow='hidden';
                 lightbox.style.visibility='visible';
                 lightbox.classList.remove('fout');
@@ -207,8 +210,18 @@ function set_img(target){
                 setTimeout(()=>{ //「mサイズ」の画像しかない場合
                     if(!box_img.naturalWidth){
                         box_img.src=medium_src;
+                        size_disp(0);
                     }}, 1000);
             }}}
+
+
+    function size_disp(n){
+        let org=lightbox.querySelector('#original');
+        if(org){
+            if(n==1){
+                org.style.display='block'; }
+            else{
+                org.style.display='none'; }}}
 
 } // set_img()
 
