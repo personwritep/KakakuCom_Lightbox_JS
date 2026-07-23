@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        KakakuCom Lightbox JS
 // @namespace        http://tampermonkey.net/
-// @version        0.4
+// @version        0.5
 // @description        価格.COMのユーザー投稿画像を高精細拡大表示
 // @author        価格.COMユーザー
 // @match        https://*.kakaku.com/*
@@ -321,13 +321,17 @@ function disp_ws(n){
 
 
 function get_cookie(name){
-    let cookie_req=document.cookie.split('; ').find(row=>row.startsWith(name));
-    if(cookie_req){
-        if(cookie_req.split('=')[1]==null){
+    let cookie_req=document.cookie.split(';');
+    for(let k=0; k<cookie_req.length; k++){
+        cookie_req[k]=cookie_req[k].trim(); } // 前後の空白を削除
+
+    let cookie=cookie_req.find(row=>row.startsWith(name+'='));
+    if(cookie){
+        if(cookie.split('=')[1]==null){
             return 0; }
         else{
-            return cookie_req.split('=')[1]; }}
-    if(!cookie_req){
+            return cookie.split('=')[1]; }}
+    if(!cookie){
         return 0; }}
 
 
